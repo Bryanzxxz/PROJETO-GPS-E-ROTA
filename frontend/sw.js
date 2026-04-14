@@ -2,7 +2,7 @@
 // SERVICE WORKER — GUARUTONER PWA v3 (session persistence fix)
 // ============================================================
 
-const CACHE_NAME = 'guarutoner-v4';
+const CACHE_NAME = 'guarutoner-v5';
 const ASSETS = [
   '/',
   '/index.html',

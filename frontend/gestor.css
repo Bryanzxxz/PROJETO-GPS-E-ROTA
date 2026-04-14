@@ -554,42 +554,47 @@
 }
 
 @media (max-width: 640px) {
-  /* Header — bem compacto no celular */
+  /* Header — ultra compacto no celular */
   .top-header {
-    padding: 8px 10px;
-    gap: 6px;
+    padding: 6px 8px;
+    gap: 4px;
+    flex-wrap: nowrap;
   }
+  
+  .header-left {
+    gap: 4px !important;
+  }
+  
   .top-header h1 {
-    font-size: 13px;
+    font-size: 12px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Esconder texto "Atualização Automática", manter só o pulso verde */
   .refresh-indicator {
     font-size: 0;
-    margin-right: 4px;
+    margin-right: 2px;
     gap: 0;
   }
   .refresh-indicator .pulse {
-    width: 8px; height: 8px;
+    width: 6px; height: 6px;
   }
 
-  /* User profile compacto */
+  /* User profile ultra compacto */
   .user-profile {
-    padding-left: 8px; gap: 4px;
+    padding-left: 4px; gap: 4px;
     border-left: none;
   }
-  .user-avatar { width: 28px; height: 28px; font-size: 14px; }
-  .user-name {
-    font-size: 11px;
-    max-width: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .btn-logout { padding: 2px; }
-  .btn-notificacao { font-size: 16px; padding: 4px; }
-  .header-right { gap: 4px; }
+  .user-avatar { width: 24px; height: 24px; font-size: 12px; }
+  
+  /* ESCONDER o nome no celular para não empurrar os botões para fora */
+  .user-name { display: none; }
+  
+  .btn-logout { padding: 4px; }
+  .btn-notificacao { font-size: 14px; padding: 4px; }
+  .header-right { gap: 2px; }
 
   /* Layout de conteúdo empilhado */
   .main-content { flex-direction: column; }
