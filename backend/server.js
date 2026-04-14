@@ -720,6 +720,12 @@ app.post('/tecnico/iniciar', async (req, res) => {
     const db = await getDB();
     const dataHoje = hoje();
 
+    // Validar se o usuário é realmente um técnico
+    const userCheck = await db.get('SELECT tipo FROM users WHERE id = ?', [usuario_id]);
+    if (!userCheck || userCheck.tipo !== 'tecnico') {
+      return res.status(403).json({ erro: 'Apenas contas de técnicos podem iniciar sessões de rastreamento.' });
+    }
+
     // Verificar se já existe registro para este usuário HOJE
     const existente = await db.get(
       'SELECT * FROM tecnicos_em_campo WHERE usuario_id = ? AND data_dia = ?',
