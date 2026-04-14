@@ -1,0 +1,154 @@
+/* ============================================================
+   FIELDTRACK — DESIGN SYSTEM
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --navy-900: #000c28; /* Keep for sidebar */
+  --navy-800: #00154d; /* Brand primary - Guarutoner */
+  --navy-700: #00277f;
+  
+  --bg-main: #f8fafc;
+  --bg-white: #ffffff;
+  
+  --card: #ffffff;
+  --card-hover: #f9fafb;
+  
+  --border: #e2e8f0;
+  --border-active: rgba(26, 39, 68, 0.3);
+  
+  --white: #ffffff;
+  --text: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  
+  --blue: #00154d; /* Logo Color */
+  --blue-soft: rgba(0, 21, 77, 0.08);
+  --blue-bright: #0066cc; /* Action blue - Guarutoner light blue */
+  
+  --green: #16a34a;
+  --green-soft: rgba(22, 163, 74, 0.12);
+  --yellow: #ca8a04;
+  --yellow-soft: rgba(202, 138, 4, 0.12);
+  --red: #dc2626;
+  --red-soft: rgba(220, 38, 38, 0.12);
+  
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+  --transition: all 0.2s ease;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  background: var(--bg-main);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast-box {
+  position: fixed; top: 16px; right: 16px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none; max-width: 360px;
+}
+
+.toast-item {
+  padding: 12px 18px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 500; pointer-events: auto;
+  box-shadow: var(--shadow-lg);
+  animation: toastSlide 0.3s ease, toastFade 0.3s ease 3s forwards;
+}
+.toast-item.ok { background: #065f46; color: #6ee7b7; border-left: 3px solid var(--green); }
+.toast-item.err { background: #7f1d1d; color: #fca5a5; border-left: 3px solid var(--red); }
+.toast-item.info { background: #1e3a5f; color: #93c5fd; border-left: 3px solid var(--blue); }
+
+@keyframes toastSlide { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
+@keyframes toastFade { to { opacity:0; transform:translateY(-8px); } }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  padding: 10px 20px; border: none; border-radius: var(--radius);
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; gap: 8px; transition: var(--transition);
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-blue:hover:not(:disabled) { background: var(--navy-700); }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover:not(:disabled) { background: #15803d; }
+.btn-red { background: var(--red); color: #fff; }
+.btn-red:hover:not(:disabled) { background: #b91c1c; }
+.btn-ghost {
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+.btn-full { width: 100%; }
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+.input {
+  width: 100%; padding: 10px 14px; background: var(--bg-white);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--text); font-family: inherit; font-size: 14px;
+  outline: none; transition: var(--transition);
+}
+.input::placeholder { color: var(--text-muted); }
+.input:focus { border-color: var(--blue-bright); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-green { background: var(--green-soft); color: var(--green); }
+.badge-yellow { background: var(--yellow-soft); color: var(--yellow); }
+.badge-blue { background: var(--blue-soft); color: var(--blue); }
+.badge-red { background: var(--red-soft); color: var(--red); }
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-in { animation: fadeIn 0.4s ease forwards; }
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }

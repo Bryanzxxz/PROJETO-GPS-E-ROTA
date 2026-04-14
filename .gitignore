@@ -1,0 +1,16 @@
+# Variáveis de ambiente secretas
+.env
+backend/.env
+
+# Dependências
+node_modules/
+backend/node_modules/
+
+# Banco de dados local SQLite
+*.sqlite
+*.sqlite3
+backend/database.sqlite
+
+# Arquivos do sistema 
+.DS_Store
+Thumbs.db

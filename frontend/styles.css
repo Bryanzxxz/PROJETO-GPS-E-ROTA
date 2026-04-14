@@ -1,0 +1,399 @@
+/* ============================================================
+   VARIÁVEIS E RESET — DESIGN SYSTEM
+   ============================================================ */
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2035;
+  --bg-card-hover: #1f2847;
+  --bg-input: #0d1225;
+  --border-color: #2a3352;
+  --border-active: #4f7cff;
+  --text-primary: #e8ecf4;
+  --text-secondary: #8892a8;
+  --text-muted: #5c6580;
+  --accent-blue: #4f7cff;
+  --accent-blue-glow: rgba(79, 124, 255, 0.25);
+  --accent-green: #10b981;
+  --accent-green-glow: rgba(16, 185, 129, 0.2);
+  --accent-yellow: #f59e0b;
+  --accent-yellow-glow: rgba(245, 158, 11, 0.2);
+  --accent-red: #ef4444;
+  --accent-red-glow: rgba(239, 68, 68, 0.2);
+  --accent-purple: #8b5cf6;
+  --gradient-blue: linear-gradient(135deg, #4f7cff 0%, #3b5fc7 100%);
+  --gradient-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-yellow: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-red: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-glow-blue: 0 0 30px rgba(79, 124, 255, 0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background animado */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(79,124,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(16,185,129,0.03) 0%, transparent 50%);
+  z-index: 0;
+  animation: bgFloat 20s ease-in-out infinite;
+}
+
+@keyframes bgFloat {
+  0%, 100% { transform: translate(0,0) rotate(0deg); }
+  33% { transform: translate(2%,-1%) rotate(1deg); }
+  66% { transform: translate(-1%,2%) rotate(-1deg); }
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.app-container {
+  position: relative; z-index: 1;
+  max-width: 520px; margin: 0 auto;
+  padding: 20px 16px 100px; min-height: 100vh;
+}
+
+/* Para gestor, layout mais largo */
+.app-container.wide { max-width: 960px; }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.app-header { text-align: center; padding: 28px 0 24px; margin-bottom: 8px; }
+
+.app-header .logo-icon {
+  width: 56px; height: 56px;
+  background: var(--gradient-blue); border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-size: 28px;
+  box-shadow: var(--shadow-glow-blue);
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(79,124,255,0.15); }
+  50% { box-shadow: 0 0 40px rgba(79,124,255,0.3); }
+}
+
+.app-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+.app-header p { font-size: 13px; color: var(--text-secondary); }
+
+/* ============================================================
+   STATUS BAR (GPS + Conexão)
+   ============================================================ */
+.status-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+
+.status-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; background: var(--bg-card);
+  border: 1px solid var(--border-color); border-radius: 100px;
+  font-size: 11px; font-weight: 500; color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.status-pill .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-muted); transition: var(--transition);
+}
+
+.status-pill.active .dot {
+  background: var(--accent-green);
+  box-shadow: 0 0 8px var(--accent-green-glow);
+  animation: dotPulse 2s ease-in-out infinite;
+}
+
+.status-pill.warning .dot { background: var(--accent-yellow); box-shadow: 0 0 8px var(--accent-yellow-glow); }
+.status-pill.error .dot { background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red-glow); }
+
+@keyframes dotPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px;
+  box-shadow: var(--shadow-card); transition: var(--transition);
+  animation: fadeInUp 0.5s ease forwards; opacity: 0;
+}
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.15s; }
+.card:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-title {
+  font-size: 14px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title .icon { font-size: 16px; }
+
+/* ============================================================
+   INPUTS E BOTÕES
+   ============================================================ */
+.input-group { display: flex; gap: 10px; margin-bottom: 12px; }
+
+input[type="text"] {
+  flex: 1; padding: 12px 16px; background: var(--bg-input);
+  border: 1px solid var(--border-color); border-radius: var(--radius-md);
+  color: var(--text-primary); font-family: 'Inter', sans-serif;
+  font-size: 14px; outline: none; transition: var(--transition);
+}
+input[type="text"]::placeholder { color: var(--text-muted); }
+input[type="text"]:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-blue-glow); }
+
+.btn {
+  padding: 12px 20px; border: none; border-radius: var(--radius-md);
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; gap: 8px; transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+.btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(rgba(255,255,255,0.1), transparent);
+  opacity: 0; transition: var(--transition);
+}
+.btn:hover::after { opacity: 1; }
+.btn:active { transform: scale(0.97); }
+
+.btn-primary { background: var(--gradient-blue); color: #fff; box-shadow: 0 4px 16px rgba(79,124,255,0.3); }
+.btn-primary:hover { box-shadow: 0 6px 24px rgba(79,124,255,0.45); transform: translateY(-1px); }
+
+.btn-success { background: var(--gradient-green); color: #fff; box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
+.btn-success:hover { box-shadow: 0 6px 24px rgba(16,185,129,0.45); transform: translateY(-1px); }
+
+.btn-warning { background: var(--gradient-yellow); color: #fff; box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
+.btn-warning:hover { box-shadow: 0 6px 24px rgba(245,158,11,0.45); transform: translateY(-1px); }
+
+.btn-danger { background: var(--gradient-red); color: #fff; box-shadow: 0 4px 16px rgba(239,68,68,0.3); }
+.btn-danger:hover { box-shadow: 0 6px 24px rgba(239,68,68,0.45); transform: translateY(-1px); }
+
+.btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
+.btn-outline:hover { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(79,124,255,0.05); }
+
+.btn-full { width: 100%; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+.btn-group { display: flex; gap: 10px; margin-top: 12px; }
+.btn-group .btn { flex: 1; }
+
+/* ============================================================
+   LISTA DE CLIENTES
+   ============================================================ */
+.client-list { list-style: none; margin-top: 12px; }
+
+.client-list li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--bg-input);
+  border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+  margin-bottom: 8px; transition: var(--transition);
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+.client-list li.current {
+  border-color: var(--accent-blue);
+  background: rgba(79,124,255,0.07);
+  box-shadow: 0 0 0 3px var(--accent-blue-glow);
+}
+
+.client-list li.done {
+  opacity: 0.45; text-decoration: line-through;
+  border-color: var(--accent-green);
+}
+
+.client-list li .client-info { display: flex; align-items: center; gap: 10px; }
+
+.client-list li .client-number {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--border-color); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--text-secondary); flex-shrink: 0;
+}
+
+.client-list li.current .client-number { background: var(--accent-blue); color: #fff; }
+.client-list li.done .client-number { background: var(--accent-green); color: #fff; }
+.client-list li .client-name { font-size: 14px; font-weight: 500; }
+
+.client-list li .remove-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: none;
+  background: transparent; color: var(--text-muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: var(--transition);
+}
+.client-list li .remove-btn:hover { background: var(--accent-red-glow); color: var(--accent-red); }
+
+.empty-state { text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; }
+.empty-state .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+/* ============================================================
+   ATENDIMENTO
+   ============================================================ */
+.current-client-display {
+  text-align: center; padding: 20px;
+  background: rgba(79,124,255,0.05);
+  border: 1px dashed var(--border-color); border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+.current-client-display .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.current-client-display .name { font-size: 20px; font-weight: 700; color: var(--accent-blue); }
+.current-client-display .sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 100px;
+  font-size: 12px; font-weight: 600; margin-bottom: 12px;
+}
+.status-badge.status-online { background: rgba(79,124,255,0.12); color: var(--accent-blue); }
+.status-badge.status-em-deslocamento { background: rgba(245,158,11,0.12); color: var(--accent-yellow); }
+.status-badge.status-em-atendimento { background: rgba(16,185,129,0.12); color: var(--accent-green); }
+.status-badge.status-rota-concluida { background: rgba(139,92,246,0.12); color: var(--accent-purple); }
+
+/* ============================================================
+   TOAST / NOTIFICAÇÕES
+   ============================================================ */
+.toast-container {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none; width: 90%; max-width: 400px;
+}
+
+.toast {
+  padding: 12px 20px; border-radius: var(--radius-md);
+  font-size: 13px; font-weight: 500;
+  animation: toastIn 0.4s ease, toastOut 0.4s ease 3s forwards;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); pointer-events: auto;
+}
+.toast.success { background: linear-gradient(135deg, #065f46, #064e3b); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+.toast.error { background: linear-gradient(135deg, #7f1d1d, #6b1a1a); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+.toast.info { background: linear-gradient(135deg, #1e3a5f, #1a3352); color: #93c5fd; border: 1px solid rgba(79,124,255,0.3); }
+
+@keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+
+/* ============================================================
+   COORDENADAS
+   ============================================================ */
+.coords-display { display: flex; gap: 12px; margin-top: 12px; }
+
+.coord-item {
+  flex: 1; padding: 10px; background: var(--bg-input);
+  border: 1px solid var(--border-color); border-radius: var(--radius-sm); text-align: center;
+}
+.coord-item .coord-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.coord-item .coord-value { font-size: 14px; font-weight: 600; font-family: 'Courier New', monospace; color: var(--accent-blue); margin-top: 2px; }
+
+/* ============================================================
+   GESTOR — GRID DE TÉCNICOS
+   ============================================================ */
+.tecnico-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px; margin-top: 16px;
+}
+
+.tecnico-card {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); padding: 20px;
+  box-shadow: var(--shadow-card); transition: var(--transition);
+  animation: fadeInUp 0.4s ease forwards; opacity: 0;
+}
+.tecnico-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
+
+.tecnico-card .tc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.tecnico-card .tc-name { font-size: 16px; font-weight: 700; }
+.tecnico-card .tc-badge {
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 11px; font-weight: 600;
+}
+.tc-badge.atendimento { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+.tc-badge.deslocamento { background: rgba(245,158,11,0.15); color: var(--accent-yellow); }
+.tc-badge.inativo { background: rgba(92,101,128,0.15); color: var(--text-muted); }
+.tc-badge.online { background: rgba(79,124,255,0.15); color: var(--accent-blue); }
+.tc-badge.concluida { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+
+.tecnico-card .tc-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0; border-bottom: 1px solid rgba(42,51,82,0.5);
+  font-size: 13px;
+}
+.tecnico-card .tc-row:last-child { border-bottom: none; }
+.tecnico-card .tc-label { color: var(--text-muted); }
+.tecnico-card .tc-value { color: var(--text-primary); font-weight: 500; text-align: right; max-width: 60%; }
+
+.tecnico-card .tc-clients {
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+.tecnico-card .tc-clients-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+.tecnico-card .tc-client-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; padding: 3px 0; color: var(--text-secondary);
+}
+.tecnico-card .tc-client-item.current { color: var(--accent-blue); font-weight: 600; }
+.tecnico-card .tc-client-item.done { color: var(--text-muted); text-decoration: line-through; }
+
+/* ============================================================
+   GESTOR — STATS BAR
+   ============================================================ */
+.stats-bar {
+  display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+}
+
+.stat-item {
+  flex: 1; min-width: 120px; padding: 16px;
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); text-align: center;
+  transition: var(--transition);
+}
+.stat-item .stat-number { font-size: 28px; font-weight: 800; color: var(--accent-blue); }
+.stat-item .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+.stat-item.green .stat-number { color: var(--accent-green); }
+.stat-item.yellow .stat-number { color: var(--accent-yellow); }
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.hidden { display: none !important; }
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+@media (max-width: 380px) {
+  .app-container { padding: 12px 10px 80px; }
+  .card { padding: 18px; }
+  .btn-group { flex-direction: column; }
+}
+
+@media (max-width: 640px) {
+  .tecnico-grid { grid-template-columns: 1fr; }
+  .stats-bar { gap: 8px; }
+  .stat-item { min-width: 90px; padding: 12px; }
+  .stat-item .stat-number { font-size: 22px; }
+}

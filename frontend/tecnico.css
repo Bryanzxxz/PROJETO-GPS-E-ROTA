@@ -1,0 +1,184 @@
+/* ============================================================
+   TÉCNICO — LAYOUT MOBILE-FIRST
+   ============================================================ */
+.tech-app {
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column;
+}
+
+/* Header */
+.tech-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.tech-header .brand { display: flex; align-items: center; gap: 8px; }
+.tech-header .brand .logo { width: auto; height: auto; max-width: 140px; max-height: 28px; object-fit: contain; }
+.tech-header .brand .title { font-size: 15px; font-weight: 700; color: var(--navy-800); }
+
+.tech-header .header-actions { display: flex; align-items: center; gap: 12px; }
+
+.user-profile-sm {
+  display: flex; align-items: center;
+  border-right: 1px solid var(--border);
+  padding-right: 12px;
+}
+.user-profile-sm .user-name { font-size: 13px; font-weight: 600; color: var(--text); }
+
+.btn-icon {
+  background: transparent; border: none; cursor: pointer; color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  padding: 4px; border-radius: 6px; transition: var(--transition);
+}
+.btn-icon:hover { background: var(--red-soft); color: var(--red); }
+
+.tech-header .status-dots {
+  display: flex; gap: 8px; align-items: center;
+}
+
+.dot-indicator {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600; color: var(--text-muted);
+}
+.dot-indicator .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-muted); transition: var(--transition);
+}
+.dot-indicator.on .dot { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+.dot-indicator.err .dot { background: var(--red); }
+
+/* Content */
+.tech-content {
+  flex: 1; padding: 16px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* Removed LOGIN */
+
+/* ============================================================
+   ROTA — LISTA DE CLIENTES
+   ============================================================ */
+.route-input-row {
+  display: flex; gap: 8px;
+}
+.route-input-row .input { flex: 1; }
+
+.client-items { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+
+.client-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--bg-white);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 14px; transition: var(--transition);
+}
+
+.client-item .num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--bg-main); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--text-secondary); flex-shrink: 0;
+}
+
+.client-item .name { flex: 1; }
+
+.client-item.active {
+  border-color: var(--blue-bright);
+  background: rgba(0, 102, 204, 0.05);
+}
+.client-item.active .num { background: var(--blue-bright); color: #fff; }
+
+.client-item.done { opacity: 0.5; background: var(--bg-main); }
+.client-item.done .num { background: var(--green); color: #fff; }
+.client-item.done .name { text-decoration: line-through; color: var(--text-muted); }
+
+.item-actions {
+  display: flex; gap: 4px; border-left: 1px solid var(--border); padding-left: 8px;
+}
+.btn-act {
+  width: 24px; height: 24px; border-radius: 4px;
+  border: none; background: transparent; color: var(--text-muted);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: var(--transition);
+}
+.btn-act:hover { background: var(--border); color: var(--text); }
+.btn-act.del:hover { color: var(--red); background: var(--red-soft); }
+
+.empty-msg {
+  text-align: center; padding: 24px; color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ============================================================
+   PAINEL DE ROTA ATIVA
+   ============================================================ */
+.active-route-panel {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px; text-align: center;
+}
+
+.active-route-panel .current-label {
+  font-size: 11px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
+}
+
+.active-route-panel .current-name {
+  font-size: 22px; font-weight: 800; color: var(--blue); margin-bottom: 4px;
+}
+
+.active-route-panel .current-counter {
+  font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;
+}
+
+.route-actions { display: flex; gap: 10px; }
+.route-actions .btn { flex: 1; }
+
+/* Coords strip */
+.coords-strip {
+  display: flex; gap: 8px;
+}
+
+.coords-strip .coord-box {
+  flex: 1; text-align: center; padding: 8px;
+  background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: var(--radius); font-size: 10px; color: var(--text-muted);
+}
+.coords-strip .coord-box .val {
+  font-size: 13px; font-weight: 600; color: var(--blue-bright);
+  font-family: 'Courier New', monospace; margin-top: 2px;
+}
+
+/* ============================================================
+   DRAG & DROP — REORDENAÇÃO POR ARRASTE
+   ============================================================ */
+.drag-handle {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; flex-shrink: 0;
+  color: var(--text-muted); cursor: grab;
+  border-radius: 6px; transition: var(--transition);
+  touch-action: none; /* Prevent scroll during drag */
+  -webkit-user-select: none; user-select: none;
+}
+.drag-handle:hover { background: var(--border); color: var(--text-secondary); }
+.drag-handle:active { cursor: grabbing; color: var(--blue-bright); }
+.drag-handle.disabled {
+  visibility: hidden; pointer-events: none;
+}
+
+.client-item { touch-action: pan-x; }
+
+.drag-clone {
+  border-radius: var(--radius) !important;
+  border: 2px solid var(--blue-bright) !important;
+  background: var(--bg-white) !important;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (min-width: 600px) {
+  .tech-content { padding: 24px; max-width: 480px; margin: 0 auto; }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Guarutoner — Técnico</title>
+  <meta name="description" content="Guarutoner — Sistema de rastreamento de técnicos em campo">
+  <meta name="theme-color" content="#1a2744">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/logo.jpg">
+  <link rel="apple-touch-icon" href="icons/logo.jpg">
+  <link rel="stylesheet" href="shared.css">
+  <link rel="stylesheet" href="tecnico.css">
+</head>
+<body>
+  <div class="toast-box" id="toasts"></div>
+
+  <div class="tech-app">
+    <!-- HEADER -->
+    <header class="tech-header" id="appHeader">
+      <div class="brand">
+        <img src="icons/logo.png" alt="Guarutoner" class="logo">
+        <span class="title" style="display:none">Guarutoner</span>
+      </div>
+      <div class="header-actions">
+        <div class="user-profile-sm">
+          <span id="userNameDisplay" class="user-name">Técnico</span>
+        </div>
+        <div class="status-dots">
+          <div class="dot-indicator" id="gpsInd" title="GPS"><span class="dot"></span></div>
+          <div class="dot-indicator" id="netInd" title="API"><span class="dot"></span></div>
+        </div>
+        <button id="btnLogout" class="btn-icon" title="Sair do sistema">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="tech-content">
+
+      <!-- ROTA -->
+      <div id="viewRoute">
+
+        <!-- Rota Ativa (hidden until start) -->
+        <div id="activePanel" style="display:none; margin-bottom: 14px;">
+          <div class="active-route-panel fade-in">
+            <div class="current-label">Cliente Atual</div>
+            <div class="current-name" id="curName">—</div>
+            <div class="current-counter" id="curCounter"></div>
+            <div class="route-actions">
+              <button class="btn btn-blue" id="btnNext">Próximo Cliente</button>
+              <button class="btn btn-red" id="btnFinish">Finalizar Rota</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Adicionar clientes (Agora sempre on) -->
+        <div class="card fade-in" id="addClientCard">
+          <div class="card-title" id="listTitle">Rota de Clientes</div>
+          <div class="route-input-row" style="margin-bottom: 12px;">
+            <input type="text" class="input" id="inpCliente" placeholder="Nome do cliente">
+            <button class="btn btn-ghost" id="btnAdd">Adicionar</button>
+          </div>
+          <div class="client-items" id="clientList"></div>
+          <div class="empty-msg" id="emptyMsg">Adicione clientes para criar a rota</div>
+          <button class="btn btn-green btn-full" id="btnStart" style="margin-top:12px; display:none">
+            Iniciar Rota
+          </button>
+        </div>
+
+        <!-- GPS Coords -->
+        <div class="coords-strip fade-in" style="margin-top: 14px;">
+          <div class="coord-box">LAT <div class="val" id="latVal">—</div></div>
+          <div class="coord-box">LNG <div class="val" id="lngVal">—</div></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="tecnico.js"></script>
+</body>
+</html>
