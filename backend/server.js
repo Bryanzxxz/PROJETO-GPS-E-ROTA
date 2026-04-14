@@ -58,6 +58,9 @@ function setupEmail() {
     .catch(err => console.error(`  ❌ Falha na conexão SMTP: ${err.message}`));
 }
 
+// Iniciar email no ambiente global (para Vercel Serverless)
+setupEmail();
+
 async function enviarEmail(para, assunto, html) {
   if (!transporter) {
     console.error(`  ❌ [EMAIL] Transporter não configurado. Email NÃO enviado para: ${para}`);
@@ -1130,7 +1133,6 @@ app.get('/health', async (req, res) => {
 // INICIAR
 // ============================================================
 async function iniciar() {
-  setupEmail();
   await initDB();
 
   // Limpar técnicos de dias anteriores ao iniciar
