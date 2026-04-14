@@ -99,8 +99,26 @@ async function iniciarSessao() {
     const data = await r.json();
     if (!r.ok) throw new Error(data.erro || 'Erro de conexão');
 
-    if (data.reconectado) {
+    if (data.reconectado && data.sessao) {
+      // Restaurar estado completo da sessão salva no servidor
+      const sessao = data.sessao;
+      S.clientes = sessao.clientes || [];
+      S.idx = sessao.indiceAtual || 0;
+      S.emRota = sessao.emRota || false;
+      S.clienteAtual = sessao.clienteAtual || null;
+
+      // Atualizar a interface com o estado restaurado
+      renderClients();
+
+      if (S.emRota && S.clientes.length > 0) {
+        dom.btnStart.style.display = 'none';
+        dom.activePanel.style.display = '';
+        dom.listTitle.textContent = "Edição e Fila";
+        updateRouteUI();
+      }
+
       toast(`Sessão restaurada, ${S.nome}!`, 'info');
+      console.log(`[SESSÃO] Restaurada: ${S.clientes.length} clientes, idx=${S.idx}, emRota=${S.emRota}`);
     } else {
       toast(`Bem-vindo, ${S.nome}!`, 'ok');
     }
@@ -597,5 +615,5 @@ window.removeClient = removeClient;
 // PWA — REGISTRAR SERVICE WORKER
 // ============================================================
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.register('/sw.js').catch(() => { });
 }

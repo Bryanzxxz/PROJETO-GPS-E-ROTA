@@ -739,7 +739,20 @@ app.post('/tecnico/iniciar', async (req, res) => {
         ['online', agora(), usuario_id, dataHoje]
       );
       console.log(`  [TRACKING] ♻️ Técnico reconectado: "${nome}" (${usuario_id})`);
-      return res.json({ sucesso: true, tecnicoId: existente.id, reconectado: true });
+
+      // Retornar estado salvo para restauração no frontend
+      const rotaSalva = JSON.parse(existente.rota || '[]');
+      return res.json({
+        sucesso: true,
+        tecnicoId: existente.id,
+        reconectado: true,
+        sessao: {
+          clientes: rotaSalva,
+          clienteAtual: existente.cliente_atual,
+          indiceAtual: existente.indice_atual || 0,
+          emRota: existente.em_rota === 1
+        }
+      });
     }
 
     // Limpar registros de dias anteriores deste usuário
