@@ -1,8 +1,8 @@
 // ============================================================
-// SERVICE WORKER — GUARUTONER PWA v2
+// SERVICE WORKER — GUARUTONER PWA v3 (session persistence fix)
 // ============================================================
 
-const CACHE_NAME = 'guarutoner-v2';
+const CACHE_NAME = 'guarutoner-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -53,7 +53,17 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+  // Network first — sempre tenta buscar a versão mais recente
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+    fetch(e.request)
+      .then((response) => {
+        // Atualizar o cache com a versão nova
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, responseClone);
+        });
+        return response;
+      })
+      .catch(() => caches.match(e.request))
   );
 });

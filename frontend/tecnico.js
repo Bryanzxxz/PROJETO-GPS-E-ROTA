@@ -22,7 +22,7 @@ const S = {
 // ============================================================
 // AUTH CHECK & INIT
 // ============================================================
-const userStr = localStorage.getItem('guarutoner_user');
+const userStr = localStorage.getItem('guarutoner_tecnico') || localStorage.getItem('guarutoner_user');
 if (!userStr) {
   window.location.href = 'index.html';
 } else {
@@ -37,6 +37,7 @@ if (!userStr) {
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('userNameDisplay').textContent = user.nome;
       document.getElementById('btnLogout').addEventListener('click', () => {
+        localStorage.removeItem('guarutoner_tecnico');
         localStorage.removeItem('guarutoner_user');
         window.location.href = 'index.html';
       });

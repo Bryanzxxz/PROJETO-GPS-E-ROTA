@@ -6,7 +6,7 @@ const API = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
 const REFRESH_RATE = 20000; // 20 segundos
 
 // AUTH CHECK
-const userStr = localStorage.getItem('guarutoner_user');
+const userStr = localStorage.getItem('guarutoner_gestor') || localStorage.getItem('guarutoner_user');
 if (!userStr) {
   window.location.href = 'index.html';
 } else {
@@ -17,6 +17,7 @@ if (!userStr) {
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('userNameDisplay').textContent = user.nome;
       document.getElementById('btnLogout').addEventListener('click', () => {
+        localStorage.removeItem('guarutoner_gestor');
         localStorage.removeItem('guarutoner_user');
         window.location.href = 'index.html';
       });

@@ -322,7 +322,9 @@ document.addEventListener('DOMContentLoaded', () => {
         loginTime: new Date().toISOString()
       };
 
-      localStorage.setItem('guarutoner_user', JSON.stringify(userData));
+      // Salvar sessão no localStorage por tipo de conta (evitar conflito entre abas)
+      const storageKey = data.usuario.tipo === 'gestor' ? 'guarutoner_gestor' : 'guarutoner_tecnico';
+      localStorage.setItem(storageKey, JSON.stringify(userData));
       showToast(`Bem-vindo, ${data.usuario.nome}!`, 'ok');
 
       setTimeout(() => {
