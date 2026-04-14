@@ -418,7 +418,9 @@ app.get('/admin/pendentes', async (req, res) => {
 
     const pendentes = pendentesRows.map(u => ({
       ...u,
-      documento: formatarDocumento(u.documento, u.tipoDocumento)
+      tipoDocumento: u.tipodocumento || u.tipoDocumento || 'cpf',
+      criadoEm: u.criadoem || u.criadoEm || new Date().toISOString(),
+      documento: formatarDocumento(u.documento, (u.tipodocumento || u.tipoDocumento || 'cpf'))
     }));
 
     return res.json({ pendentes });
