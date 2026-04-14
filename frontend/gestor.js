@@ -341,7 +341,7 @@ async function carregarRelatorios() {
   container.innerHTML = '<div class="loading-relatorios">Carregando histórico...</div>';
 
   try {
-    const user = JSON.parse(localStorage.getItem('guarutoner_user'));
+    const user = JSON.parse(localStorage.getItem('guarutoner_gestor') || localStorage.getItem('guarutoner_user'));
     const url = `${API}/admin/historico-atendimentos?adminEmail=${encodeURIComponent(user.email)}`;
 
     const r = await fetch(url);
@@ -427,7 +427,7 @@ async function carregarEquipe() {
   container.innerHTML = '<div class="loading-relatorios">Carregando equipe...</div>';
 
   try {
-    const user = JSON.parse(localStorage.getItem('guarutoner_user'));
+    const user = JSON.parse(localStorage.getItem('guarutoner_gestor') || localStorage.getItem('guarutoner_user'));
     const url = `${API}/admin/equipe?adminEmail=${encodeURIComponent(user.email)}`;
 
     const r = await fetch(url);
@@ -521,7 +521,7 @@ if (isAdmin) {
 async function fetchAprovacoes() {
   if (!isAdmin) return;
   try {
-    const user = JSON.parse(localStorage.getItem('guarutoner_user'));
+    const user = JSON.parse(localStorage.getItem('guarutoner_gestor') || localStorage.getItem('guarutoner_user'));
     const r = await fetch(`${API}/admin/pendentes?adminEmail=${encodeURIComponent(user.email)}`);
     if (!r.ok) return;
     const data = await r.json();
@@ -574,7 +574,7 @@ async function fetchAprovacoes() {
 
 window.resolverConta = async function(userId, action) {
   try {
-    const user = JSON.parse(localStorage.getItem('guarutoner_user'));
+    const user = JSON.parse(localStorage.getItem('guarutoner_gestor') || localStorage.getItem('guarutoner_user'));
     const r = await fetch(`${API}/admin/resolver-conta`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
