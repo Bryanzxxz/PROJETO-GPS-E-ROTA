@@ -12,7 +12,7 @@
   ],
   "routes": [
     {
-      "src": "/(cadastro|verificar-email|resend-otp|auth/login|admin/pendentes|admin/notificacoes|admin/resolver-conta|admin/historico-atendimentos|admin/equipe|aprovar|test-email|tecnico/iniciar|tecnico/location|tecnico/iniciar-rota|tecnico/finalizar-rota|tecnico/concluir-atendimento|tecnicos|gestor/dashboard|gestor/historico)(/.*)?",
+      "src": "/(cadastro|verificar-email|resend-otp|auth/login|admin/pendentes|admin/notificacoes|admin/resolver-conta|admin/historico-atendimentos|admin/zerar-historico|admin/equipe|aprovar|test-email|tecnico/iniciar|tecnico/location|tecnico/iniciar-rota|tecnico/finalizar-rota|tecnico/concluir-atendimento|tecnicos|gestor/dashboard|gestor/historico)(/.*)?",
       "dest": "/backend/server.js"
     },
     {
