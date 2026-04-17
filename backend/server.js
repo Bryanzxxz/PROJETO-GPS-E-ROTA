@@ -469,6 +469,21 @@ app.get('/admin/zerar-historico', async (req, res) => {
   }
 });
 
+// GET /admin/limpar-teste — Remover APENAS o atendimento de teste "Ded"
+app.get('/admin/limpar-teste', async (req, res) => {
+  try {
+    const db = await getDB();
+    
+    // Remove o cliente teste "Ded" de hoje e decrementa a contagem nos relatórios do técnico
+    await db.run("DELETE FROM historico_atendimentos WHERE nome_cliente = 'Ded'");
+    
+    return res.send('<h2>✅ Registro de teste "Ded" apagado com sucesso do banco de dados!</h2><p>Você pode fechar esta aba e atualizar seu painel do gestor.</p>');
+  } catch (err) {
+    console.error('[ERRO] Limpar teste:', err);
+    return res.status(500).send('Erro ao tentar limpar o registro.');
+  }
+});
+
 // POST /admin/resolver-conta — Aprovar ou recusar conta
 app.post('/admin/resolver-conta', async (req, res) => {
   try {
@@ -692,7 +707,7 @@ app.get('/test-email', async (req, res) => {
           <h2 style="color: #00154d; margin-bottom: 12px;">Teste de E-mail</h2>
           <p style="color: #334155; font-size: 15px;">Este é um e-mail de teste do sistema Guarutoner.</p>
           <p style="color: #334155; font-size: 14px; margin-top: 12px;">Se você recebeu este e-mail, o SMTP está funcionando corretamente! ✅</p>
-          <p style="color: #94a3b8; font-size: 12px; margin-top: 20px;">Enviado em: ${new Date().toLocaleString('pt-BR')}</p>
+          <p style="color: #94a3b8; font-size: 12px; margin-top: 20px;">Enviado em: ${hoje().split('-').reverse().join('/')} às ${horaAtual()}</p>
         </div>
         <div style="padding: 16px; text-align: center; border-radius: 0 0 12px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none;">
           <p style="color: #94a3b8; font-size: 12px; margin: 0;">Guarutoner Sistema © ${new Date().getFullYear()}</p>
@@ -714,16 +729,22 @@ app.get('/test-email', async (req, res) => {
 // ============================================================
 // UTILIDADES — DATA
 // ============================================================
+function getBrazilDate() {
+  const d = new Date();
+  // Epoch is independent of system timezone. Subtrai 3 horas (10800000 ms) para fuso de Brasília.
+  return new Date(d.getTime() - 10800000);
+}
+
 function hoje() {
-  return new Date().toLocaleString('en-CA', { timeZone: 'America/Sao_Paulo' }).split(',')[0]; // YYYY-MM-DD
+  return getBrazilDate().toISOString().split('T')[0]; // Garante formato YYYY-MM-DD
 }
 
 function agora() {
-  return new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).replace(' ', 'T') + '-03:00';
+  return new Date().toISOString(); // Sempre usar UTC puro no backend para os registros de momento ISO
 }
 
 function horaAtual() {
-  return new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  return getBrazilDate().toISOString().split('T')[1].split('.')[0];
 }
 
 // ============================================================
