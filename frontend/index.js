@@ -327,15 +327,13 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem(storageKey, JSON.stringify(userData));
       showToast(`Bem-vindo, ${data.usuario.nome}!`, 'ok');
 
+      // Usar window.location.href ao invés de window.open para evitar
+      // bloqueio de popup no iOS Safari. window.open('...', '_blank')
+      // dentro de setTimeout é tratado como popup e silenciosamente bloqueado.
+      const destino = data.usuario.tipo === 'gestor' ? 'gestor.html' : 'tecnico.html';
+
       setTimeout(() => {
-        if (data.usuario.tipo === 'gestor') {
-          window.open('gestor.html', '_blank');
-        } else {
-          window.open('tecnico.html', '_blank');
-        }
-        // Limpar os campos para a guia de login ficar pronta para uso
-        loginEmail.value = '';
-        loginSenha.value = '';
+        window.location.href = destino;
       }, 500);
 
     } catch (err) {
