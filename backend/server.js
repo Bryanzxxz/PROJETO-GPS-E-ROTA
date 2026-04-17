@@ -448,6 +448,27 @@ app.get('/admin/notificacoes', async (req, res) => {
   }
 });
 
+// GET /admin/zerar-historico — Limpar histórico e relatórios
+app.get('/admin/zerar-historico', async (req, res) => {
+  try {
+    const adminEmail = req.query.adminEmail;
+    if (!adminEmail || adminEmail.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      return res.status(403).json({ erro: 'Acesso negado.' });
+    }
+
+    const db = await getDB();
+    await db.run('DELETE FROM historico_atendimentos');
+    await db.run('DELETE FROM relatorios');
+
+    console.log(`  [ADMIN] 🧹 Histórico de atendimentos zerado por admin: ${adminEmail}`);
+
+    return res.json({ sucesso: true, mensagem: 'Histórico e relatórios zerados com sucesso.' });
+  } catch (err) {
+    console.error('[ERRO] Zerar histórico:', err);
+    return res.status(500).json({ erro: 'Erro ao zerar histórico' });
+  }
+});
+
 // POST /admin/resolver-conta — Aprovar ou recusar conta
 app.post('/admin/resolver-conta', async (req, res) => {
   try {
@@ -694,15 +715,15 @@ app.get('/test-email', async (req, res) => {
 // UTILIDADES — DATA
 // ============================================================
 function hoje() {
-  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  return new Date().toLocaleString('en-CA', { timeZone: 'America/Sao_Paulo' }).split(',')[0]; // YYYY-MM-DD
 }
 
 function agora() {
-  return new Date().toISOString();
+  return new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).replace(' ', 'T') + '-03:00';
 }
 
 function horaAtual() {
-  return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  return new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 // ============================================================
