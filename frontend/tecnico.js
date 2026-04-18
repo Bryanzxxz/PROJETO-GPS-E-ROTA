@@ -161,6 +161,9 @@ function iniciarGPS() {
   // Ativar Wake Lock para manter tela ligada durante rastreamento
   ativarWakeLock();
 
+  // Ativar áudio silencioso para manter app viva em background
+  iniciarKeepAlive();
+
   // Detectar quando app vai para background / volta
   document.addEventListener('visibilitychange', onVisibilityChange);
 
@@ -798,11 +801,157 @@ if ('serviceWorker' in navigator) {
 }
 
 // ============================================================
-// KEEP-ALIVE — Prevenir que o navegador mate o rastreamento
+// KEEP-ALIVE — Manter navegador ativo em background (iOS + Android)
 // ============================================================
+// TÉCNICA: Tocar áudio silencioso via <audio> element HTML.
+// O iOS trata páginas com mídia ativa como "Now Playing" e NÃO suspende.
+// Isso permite GPS em background enquanto o usuário mexe no WhatsApp etc.
+// ============================================================
+
+let keepAliveElement = null;
+
+function iniciarKeepAlive() {
+  try {
+    // ---- MÉTODO 1: <audio> element com WAV silencioso (MELHOR PARA iOS) ----
+    // Gerar um arquivo WAV silencioso programaticamente
+    const silentWav = gerarWavSilencioso(2); // 2 segundos de silêncio
+
+    keepAliveElement = document.createElement('audio');
+    keepAliveElement.setAttribute('id', 'keepAliveAudio');
+    keepAliveElement.setAttribute('playsinline', ''); // iOS exige
+    keepAliveElement.setAttribute('webkit-playsinline', ''); // iOS antigo
+    keepAliveElement.loop = true;
+    keepAliveElement.volume = 0.01; // Quase zero mas não zero (iOS ignora volume 0)
+    keepAliveElement.src = silentWav;
+    document.body.appendChild(keepAliveElement);
+
+    // Tentar tocar automaticamente
+    const tentarPlay = () => {
+      if (keepAliveElement && keepAliveElement.paused) {
+        keepAliveElement.play().then(() => {
+          console.log('[KEEP-ALIVE] ✅ Áudio silencioso tocando — app ficará viva em background');
+        }).catch(() => {
+          // Navegador bloqueou autoplay, vai tentar no próximo toque
+          console.log('[KEEP-ALIVE] Autoplay bloqueado, esperando interação do usuário...');
+        });
+      }
+    };
+
+    tentarPlay();
+
+    // iOS exige interação do usuário para iniciar áudio
+    // Estas listeners garantem que o áudio inicie no primeiro toque
+    const ativarNoToque = () => {
+      tentarPlay();
+
+      // Também resumir AudioContext se existir
+      if (keepAliveCtx && keepAliveCtx.state === 'suspended') {
+        keepAliveCtx.resume();
+      }
+    };
+
+    document.addEventListener('touchstart', ativarNoToque, { passive: true });
+    document.addEventListener('click', ativarNoToque, { passive: true });
+
+    // Quando voltar do background: garantir que o áudio continue tocando
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        tentarPlay();
+      }
+    });
+
+    // Se o áudio parar por qualquer motivo, reiniciar
+    keepAliveElement.addEventListener('pause', () => {
+      setTimeout(tentarPlay, 100);
+    });
+
+    keepAliveElement.addEventListener('ended', () => {
+      keepAliveElement.currentTime = 0;
+      tentarPlay();
+    });
+
+    // ---- MÉTODO 2: Web Audio API como backup (MELHOR PARA Android) ----
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) {
+      keepAliveCtx = new AudioContext();
+      const bufferSize = keepAliveCtx.sampleRate;
+      const silentBuffer = keepAliveCtx.createBuffer(1, bufferSize, keepAliveCtx.sampleRate);
+      const source = keepAliveCtx.createBufferSource();
+      source.buffer = silentBuffer;
+      source.loop = true;
+      const gainNode = keepAliveCtx.createGain();
+      gainNode.gain.value = 0.001;
+      source.connect(gainNode);
+      gainNode.connect(keepAliveCtx.destination);
+      source.start(0);
+      console.log('[KEEP-ALIVE] Web Audio API backup ativado');
+    }
+
+    // ---- MÉTODO 3: Media Session API (sinalizar ao OS que somos app de mídia) ----
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: 'Guarutoner — Rastreamento Ativo',
+        artist: 'GPS em tempo real',
+        album: 'Guarutoner'
+      });
+      // Isso faz o iOS/Android mostrarem controles de mídia
+      // e tratarem a página como "app de mídia ativa"
+      navigator.mediaSession.setActionHandler('play', tentarPlay);
+      navigator.mediaSession.setActionHandler('pause', () => {
+        // Não permitir pausar — manter tocando
+        tentarPlay();
+      });
+      console.log('[KEEP-ALIVE] Media Session API configurada');
+    }
+
+  } catch (err) {
+    console.warn('[KEEP-ALIVE] Erro ao iniciar:', err.message);
+  }
+}
+
+let keepAliveCtx = null;
+
+// Gerar um arquivo WAV silencioso como data URL
+function gerarWavSilencioso(durationSecs) {
+  const sampleRate = 8000; // Baixa qualidade = arquivo pequeno
+  const numSamples = sampleRate * durationSecs;
+  const dataSize = numSamples * 2; // 16-bit = 2 bytes por sample
+  const fileSize = 44 + dataSize; // Header WAV = 44 bytes
+
+  const buffer = new ArrayBuffer(fileSize);
+  const view = new DataView(buffer);
+
+  // WAV Header
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, fileSize - 8, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true); // chunk size
+  view.setUint16(20, 1, true); // PCM format
+  view.setUint16(22, 1, true); // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true); // byte rate
+  view.setUint16(32, 2, true); // block align
+  view.setUint16(34, 16, true); // bits per sample
+  writeString(view, 36, 'data');
+  view.setUint32(40, dataSize, true);
+
+  // Dados de áudio = todos zeros (silêncio)
+  // ArrayBuffer já é inicializado com zeros
+
+  // Converter para data URL
+  const blob = new Blob([buffer], { type: 'audio/wav' });
+  return URL.createObjectURL(blob);
+}
+
+function writeString(view, offset, string) {
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
+}
+
 // Solicitar permissão de notificação (ajuda a manter PWA viva em background)
 if ('Notification' in window && Notification.permission === 'default') {
-  // Será pedido na primeira interação do usuário
   document.addEventListener('click', function pedirNotif() {
     Notification.requestPermission().then(perm => {
       console.log('[NOTIF] Permissão de notificação:', perm);
