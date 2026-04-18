@@ -3,7 +3,9 @@
 // ============================================================
 
 const API = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
-const GPS_INTERVAL = 5000; // 5 segundos
+const GPS_INTERVAL = 10000; // 10 segundos (fallback — envio principal é via watchPosition)
+let lastSendTime = 0;
+const MIN_SEND_INTERVAL = 2000; // mínimo 2s entre envios para não sobrecarregar
 
 // Estado
 const S = {
@@ -16,7 +18,9 @@ const S = {
   lat: null,
   lng: null,
   watchId: null,
-  gpsTimer: null
+  gpsTimer: null,
+  wakeLock: null,
+  bgSendTimer: null
 };
 
 // ============================================================
@@ -138,7 +142,7 @@ async function iniciarSessao() {
 }
 
 // ============================================================
-// GPS — Monitoramento contínuo
+// GPS — Monitoramento contínuo (tempo real + background)
 // ============================================================
 function iniciarGPS() {
   if (!navigator.geolocation) {
@@ -147,35 +151,209 @@ function iniciarGPS() {
     return;
   }
 
+  iniciarWatchPosition();
+
+  // Enviar imediatamente ao iniciar
+  enviarLocalizacao();
+  // Fallback: enviar a cada 10s caso watchPosition pare de disparar
+  S.gpsTimer = setInterval(enviarLocalizacao, GPS_INTERVAL);
+
+  // Ativar Wake Lock para manter tela ligada durante rastreamento
+  ativarWakeLock();
+
+  // Detectar quando app vai para background / volta
+  document.addEventListener('visibilitychange', onVisibilityChange);
+
+  // Enviar última posição antes de fechar a página
+  window.addEventListener('pagehide', enviarBeacon);
+  window.addEventListener('beforeunload', enviarBeacon);
+}
+
+// Iniciar/reiniciar o watchPosition
+function iniciarWatchPosition() {
+  // Limpar watch anterior se existir
+  if (S.watchId !== null) {
+    navigator.geolocation.clearWatch(S.watchId);
+    S.watchId = null;
+  }
+
   S.watchId = navigator.geolocation.watchPosition(
     (pos) => {
       S.lat = pos.coords.latitude;
       S.lng = pos.coords.longitude;
+
+      // Atualizar UI apenas se a página estiver visível
+      if (document.visibilityState === 'visible') {
+        dom.latVal.textContent = S.lat.toFixed(6);
+        dom.lngVal.textContent = S.lng.toFixed(6);
+        dom.gpsInd.classList.add('on');
+        dom.gpsInd.classList.remove('err');
+      }
+
+      // Enviar imediatamente a cada mudança de posição (com debounce)
+      const agora = Date.now();
+      if (agora - lastSendTime >= MIN_SEND_INTERVAL) {
+        lastSendTime = agora;
+        enviarLocalizacao();
+      }
+    },
+    (err) => {
+      if (document.visibilityState === 'visible') {
+        dom.gpsInd.classList.remove('on');
+        dom.gpsInd.classList.add('err');
+      }
+      if (err.code === err.PERMISSION_DENIED) {
+        toast('⚠️ Permita o acesso ao GPS nas configurações do navegador para utilizar o rastreamento.', 'err');
+      } else if (err.code === err.POSITION_UNAVAILABLE) {
+        toast('GPS indisponível no momento. Verifique se o GPS está ativado.', 'err');
+      } else if (err.code === err.TIMEOUT) {
+        console.warn('[GPS] Timeout ao obter posição, tentando novamente...');
+      }
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+
+  console.log('[GPS] watchPosition iniciado/reiniciado');
+}
+
+// ============================================================
+// WAKE LOCK — Manter tela ativa durante rastreamento
+// ============================================================
+async function ativarWakeLock() {
+  if (!('wakeLock' in navigator)) {
+    console.log('[WAKE] Wake Lock API não disponível neste navegador');
+    return;
+  }
+  try {
+    S.wakeLock = await navigator.wakeLock.request('screen');
+    console.log('[WAKE] ✅ Wake Lock ativado — tela não vai apagar');
+
+    // Wake Lock pode ser liberado pelo sistema, re-adquirir automaticamente
+    S.wakeLock.addEventListener('release', () => {
+      console.log('[WAKE] Wake Lock liberado pelo sistema');
+      // Tentar re-adquirir se a página ainda está visível
+      if (document.visibilityState === 'visible') {
+        ativarWakeLock();
+      }
+    });
+  } catch (err) {
+    console.warn('[WAKE] Não foi possível ativar Wake Lock:', err.message);
+  }
+}
+
+// ============================================================
+// BACKGROUND HANDLING — Manter GPS ativo em segundo plano
+// ============================================================
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    console.log('[BG] App voltou ao primeiro plano');
+
+    // Re-ativar Wake Lock
+    ativarWakeLock();
+
+    // Reiniciar watchPosition (pode ter morrido em background)
+    iniciarWatchPosition();
+
+    // Enviar localização imediatamente ao voltar
+    lastSendTime = 0; // resetar debounce
+    enviarLocalizacao();
+
+    // Atualizar UI com última posição conhecida
+    if (S.lat !== null) {
       dom.latVal.textContent = S.lat.toFixed(6);
       dom.lngVal.textContent = S.lng.toFixed(6);
       dom.gpsInd.classList.add('on');
       dom.gpsInd.classList.remove('err');
-    },
-    (err) => {
-      dom.gpsInd.classList.remove('on');
-      dom.gpsInd.classList.add('err');
-      if (err.code === err.PERMISSION_DENIED) {
-        toast('Permita o acesso ao GPS para utilizar o sistema.', 'err');
-      }
-    },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 3000 }
-  );
+    }
 
-  // Enviar localização a cada 5 segundos
-  enviarLocalizacao(); // enviar imediatamente
-  S.gpsTimer = setInterval(enviarLocalizacao, GPS_INTERVAL);
+    // Limpar timer de background se existir
+    if (S.bgSendTimer) {
+      clearInterval(S.bgSendTimer);
+      S.bgSendTimer = null;
+    }
+
+  } else {
+    console.log('[BG] App foi para segundo plano — mantendo GPS ativo');
+
+    // Em background: usar getCurrentPosition como fallback
+    // (watchPosition pode parar em alguns navegadores em background)
+    S.bgSendTimer = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          S.lat = pos.coords.latitude;
+          S.lng = pos.coords.longitude;
+          enviarBeaconSilencioso();
+        },
+        () => { /* silencioso em background */ },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+      );
+    }, 8000); // a cada 8 segundos em background
+  }
+}
+
+// Enviar via sendBeacon (funciona mesmo ao fechar/minimizar a página)
+function enviarBeacon() {
+  if (!S.usuario_id || S.lat === null) return;
+  const dados = JSON.stringify({
+    usuario_id: S.usuario_id,
+    latitude: S.lat,
+    longitude: S.lng,
+    status: S.emRota ? `Atendendo: ${S.clienteAtual}` : 'online',
+    clienteAtual: S.clienteAtual,
+    listaClientes: S.clientes,
+    indiceAtual: S.idx,
+    emRota: S.emRota
+  });
+
+  // sendBeacon é mais confiável que fetch em pagehide/beforeunload
+  if (navigator.sendBeacon) {
+    const blob = new Blob([dados], { type: 'application/json' });
+    navigator.sendBeacon(`${API}/tecnico/location`, blob);
+    console.log('[BEACON] Localização enviada via sendBeacon');
+  }
+}
+
+// Enviar silenciosamente em background (sem atualizar UI)
+function enviarBeaconSilencioso() {
+  if (!S.usuario_id || S.lat === null) return;
+  const dados = JSON.stringify({
+    usuario_id: S.usuario_id,
+    latitude: S.lat,
+    longitude: S.lng,
+    status: S.emRota ? `Atendendo: ${S.clienteAtual}` : 'online',
+    clienteAtual: S.clienteAtual,
+    listaClientes: S.clientes,
+    indiceAtual: S.idx,
+    emRota: S.emRota
+  });
+
+  // Usar sendBeacon em background (não é bloqueado)
+  if (navigator.sendBeacon) {
+    const blob = new Blob([dados], { type: 'application/json' });
+    navigator.sendBeacon(`${API}/tecnico/location`, blob);
+  } else {
+    // Fallback: fetch com keepalive
+    fetch(`${API}/tecnico/location`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: dados,
+      keepalive: true
+    }).catch(() => {});
+  }
 }
 
 // ============================================================
-// ENVIAR LOCALIZAÇÃO (a cada 5s)
+// ENVIAR LOCALIZAÇÃO — Envio principal (com UI feedback)
 // ============================================================
 async function enviarLocalizacao() {
   if (!S.usuario_id) return;
+
+  // Se estiver em background, usar beacon silencioso
+  if (document.visibilityState !== 'visible') {
+    enviarBeaconSilencioso();
+    return;
+  }
+
   try {
     const r = await fetch(`${API}/tecnico/location`, {
       method: 'POST',
@@ -617,4 +795,18 @@ window.removeClient = removeClient;
 // ============================================================
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => { });
+}
+
+// ============================================================
+// KEEP-ALIVE — Prevenir que o navegador mate o rastreamento
+// ============================================================
+// Solicitar permissão de notificação (ajuda a manter PWA viva em background)
+if ('Notification' in window && Notification.permission === 'default') {
+  // Será pedido na primeira interação do usuário
+  document.addEventListener('click', function pedirNotif() {
+    Notification.requestPermission().then(perm => {
+      console.log('[NOTIF] Permissão de notificação:', perm);
+    });
+    document.removeEventListener('click', pedirNotif);
+  }, { once: true });
 }

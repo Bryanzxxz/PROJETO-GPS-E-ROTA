@@ -323,14 +323,16 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // Salvar sessão no localStorage por tipo de conta (evitar conflito entre abas)
-      const storageKey = data.usuario.tipo === 'gestor' ? 'guarutoner_gestor' : 'guarutoner_tecnico';
+      // Gestores e admins usam o mesmo painel
+      const isGestorOrAdmin = data.usuario.tipo === 'gestor' || data.usuario.tipo === 'admin';
+      const storageKey = isGestorOrAdmin ? 'guarutoner_gestor' : 'guarutoner_tecnico';
       localStorage.setItem(storageKey, JSON.stringify(userData));
       showToast(`Bem-vindo, ${data.usuario.nome}!`, 'ok');
 
       // Usar window.location.href ao invés de window.open para evitar
       // bloqueio de popup no iOS Safari. window.open('...', '_blank')
       // dentro de setTimeout é tratado como popup e silenciosamente bloqueado.
-      const destino = data.usuario.tipo === 'gestor' ? 'gestor.html' : 'tecnico.html';
+      const destino = isGestorOrAdmin ? 'gestor.html' : 'tecnico.html';
 
       setTimeout(() => {
         window.location.href = destino;

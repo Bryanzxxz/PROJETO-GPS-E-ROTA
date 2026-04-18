@@ -3,7 +3,7 @@
 // ============================================================
 
 const API = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
-const REFRESH_RATE = 20000; // 20 segundos
+const REFRESH_RATE = 8000; // 8 segundos — atualização próxima do tempo real
 
 // AUTH CHECK
 const userStr = localStorage.getItem('guarutoner_gestor') || localStorage.getItem('guarutoner_user');
@@ -11,7 +11,8 @@ if (!userStr) {
   window.location.href = 'index.html';
 } else {
   const user = JSON.parse(userStr);
-  if (user.tipo !== 'gestor') {
+  // Permitir acesso ao painel para gestores E admin
+  if (user.tipo !== 'gestor' && user.tipo !== 'admin') {
     window.location.href = 'index.html';
   } else {
     document.addEventListener('DOMContentLoaded', () => {
@@ -159,7 +160,7 @@ function initMap() {
 }
 
 // Animação suave do marcador (interpola entre posição atual e nova)
-function animateMarker(markerId, newLat, newLng, duration = 1000) {
+function animateMarker(markerId, newLat, newLng, duration = 800) {
   const marker = markers[markerId];
   if (!marker) return;
 

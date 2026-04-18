@@ -140,6 +140,28 @@ function validarEmail(email) {
 }
 
 // ============================================================
+// PERMISSÕES — Helpers
+// ============================================================
+async function isGestorOrAdmin(email) {
+  if (!email) return false;
+  const emailLimpo = email.trim().toLowerCase();
+  // Admin fixo sempre tem acesso
+  if (emailLimpo === ADMIN_EMAIL.toLowerCase()) return true;
+  // Verificar se é gestor aprovado no banco
+  const db = await getDB();
+  const user = await db.get(
+    "SELECT tipo FROM users WHERE email = ? AND status = 'aprovado'",
+    [emailLimpo]
+  );
+  return user && (user.tipo === 'gestor' || user.tipo === 'admin');
+}
+
+function isAdminOnly(email) {
+  if (!email) return false;
+  return email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase();
+}
+
+// ============================================================
 // ROTAS — CADASTRO E AUTENTICAÇÃO
 // ============================================================
 
@@ -970,11 +992,12 @@ app.get('/tecnicos', async (req, res) => {
 });
 
 // GET /admin/relatorios — Listar relatórios (com filtros)
+// Acesso: gestor + admin
 app.get('/admin/relatorios', async (req, res) => {
   try {
     const { adminEmail, data } = req.query;
 
-    if (!adminEmail || adminEmail.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    if (!(await isGestorOrAdmin(adminEmail))) {
       return res.status(403).json({ erro: 'Acesso negado.' });
     }
 
@@ -1043,11 +1066,12 @@ app.post('/tecnico/concluir-atendimento', async (req, res) => {
 });
 
 // GET /admin/historico-atendimentos — Listar histórico agrupado por data/técnico
+// Acesso: gestor + admin
 app.get('/admin/historico-atendimentos', async (req, res) => {
   try {
     const { adminEmail, data } = req.query;
 
-    if (!adminEmail || adminEmail.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    if (!(await isGestorOrAdmin(adminEmail))) {
       return res.status(403).json({ erro: 'Acesso negado.' });
     }
 
@@ -1092,11 +1116,12 @@ app.get('/admin/historico-atendimentos', async (req, res) => {
 });
 
 // GET /admin/equipe — Listar equipe com contagem de atendimentos
+// Acesso: gestor + admin
 app.get('/admin/equipe', async (req, res) => {
   try {
     const { adminEmail } = req.query;
 
-    if (!adminEmail || adminEmail.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    if (!(await isGestorOrAdmin(adminEmail))) {
       return res.status(403).json({ erro: 'Acesso negado.' });
     }
 
