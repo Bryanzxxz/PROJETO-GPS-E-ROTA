@@ -150,10 +150,20 @@ async function isGestorOrAdmin(email) {
   // Verificar se é gestor aprovado no banco
   const db = await getDB();
   const user = await db.get(
-    "SELECT tipo FROM users WHERE email = ? AND status = 'aprovado'",
+    "SELECT tipo, status FROM users WHERE LOWER(email) = ?",
     [emailLimpo]
   );
-  return user && (user.tipo === 'gestor' || user.tipo === 'admin');
+  
+  if (!user) return false;
+  
+  const status = (user.status || '').toLowerCase();
+  const tipo = (user.tipo || '').toLowerCase();
+
+  if (status === 'pendente' || status === 'rejeitado') {
+    return false;
+  }
+
+  return (tipo === 'gestor' || tipo === 'admin' || tipo === 'backoffice');
 }
 
 function isAdminOnly(email) {
